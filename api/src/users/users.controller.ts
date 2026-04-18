@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put, Query } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 
@@ -9,8 +9,16 @@ export class UsersController {
   ){}
 
   @Get()
-  findAll(){
-    return this.usersService.findAll();
+  findAll(
+    @Query('page') page = '1',
+    @Query('limit') limit = '10',
+    @Query('search') search?: string,
+  ){
+    return this.usersService.findAll({
+      page: Number(page),
+      limit: Number(limit),
+      search
+    });
   }
 
   @Post()

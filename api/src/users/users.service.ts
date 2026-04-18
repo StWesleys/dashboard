@@ -8,8 +8,43 @@ export class UsersService {
     private prisma: PrismaService
   ){}
 
-  findAll(){
-    return this.prisma.user.findMany();
+  async findAll(params: {
+    page: number;
+    limit: number;
+    search?: string;
+  }){
+    const { page, limit, search } = params;
+
+    const skip = (page - 1) * limit;
+
+    const where = search
+      ? {
+          OR: [
+            { name: { contains: search } },
+            { email: { contains: search } },
+          ]
+        }
+      : {};
+
+    const [users, total] = await Promise.all([
+      this.prisma.user.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { id: 'desc' }
+      }),
+
+      this.prisma.user.count({ where }),
+    ]);
+
+    return {
+      data: users,
+      meta: {
+        total,
+        page,
+        lastPage: Math.ceil(total / limit),
+      },
+    };
   }
 
   async create(data: CreateUserDto){
