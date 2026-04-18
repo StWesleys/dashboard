@@ -1,4 +1,4 @@
-import type { UsersResponse } from "../types/user";
+import type { User, UsersResponse } from "../types/user";
 
 const API_URL = 'http://localhost:3000/users';
 
@@ -24,4 +24,23 @@ export async function getUsers(
   }
 
   return response.json();
+}
+
+export async function createUser(data: {
+  name: string;
+  email: string;
+}): Promise<User> {
+    const response = await fetch(API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+
+    if(!response.ok){
+      throw new Error('Erro ao criar usuário')
+    }
+
+    return response.json();
 }

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import type { User } from "../types/user";
-import { getUsers } from "../services/userService";
+import { createUser, getUsers } from "../services/userService";
 import UserList from "../components/UserList";
 import { useDebounce } from "../hooks/useDebounce";
 
@@ -14,6 +14,9 @@ function Users() {
         lastPage: number;
     }| null>(null);
     const [loading, setLoading] = useState(false);
+
+    const [name, setName] = useState('');
+    const [email, setEmail] = useState('');
 
     const debouncedSearch = useDebounce(search, 500);
 
@@ -39,6 +42,21 @@ function Users() {
         }
     }
 
+    async function handleCreateUser(e: React.FormEvent) {
+        e.preventDefault();
+
+        try{
+            await createUser({ name, email });
+
+            setName('');
+            setEmail('');
+
+            fetchUsers();
+        } catch(error) {
+            console.error(error);
+        }
+    }
+
     function handleNext(){
         if(meta && page < meta?.lastPage){
             setPage((prev) => prev + 1);
@@ -54,6 +72,24 @@ function Users() {
     return(
         <div>
             <h1>Usuários</h1>
+
+            <form onSubmit={handleCreateUser}>
+                <input 
+                    type="text"
+                    placeholder="Nome"
+                    value={name}
+                    onChange={(e) => setName(e?.target?.value)} 
+                />
+
+                <input 
+                    type="email"
+                    placeholder="Email"
+                    value={email}
+                    onChange={(e) => setEmail(e?.target?.value)} 
+                />
+
+                <button type="submit">Criar</button>
+            </form>
 
             <input 
                 type="text"
